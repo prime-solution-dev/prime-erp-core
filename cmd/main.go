@@ -23,7 +23,7 @@ func main() {
 
 	routes.RegisterRoutes(ginEngine)
 
-	port := "9199"
+	port := "9115"
 	log.Printf("Starting server on port %s\n", port)
 	if err := ginEngine.Run(":" + port); err != nil {
 		log.Fatalf("Could not start server: %s\n", err)
