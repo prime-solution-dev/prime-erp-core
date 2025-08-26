@@ -57,9 +57,9 @@ type PriceListGroupTerm struct {
 	PriceListGroupID uuid.UUID `json:"price_list_group_id"`
 	TermCode         string    `json:"term_code"`
 	PDC              float64   `json:"pdc"`
-	PDCPercent       int       `json:"pdc_percent"`
+	PDCPercent       float64   `json:"pdc_percent"`
 	Due              float64   `json:"due"`
-	DuePercent       int       `json:"due_percent"`
+	DuePercent       float64   `json:"due_percent"`
 	CreateBy         string    `json:"create_by"`
 	CreateDtm        time.Time `json:"create_dtm"`
 	UpdateBy         string    `json:"update_by"`
@@ -90,6 +90,7 @@ type GroupExtraKey struct {
 	ID           uuid.UUID `json:"id"`
 	GroupExtraID uuid.UUID `json:"group_extra_id"`
 	Code         string    `json:"code"`
+	Value        string    `json:"value"`
 	Seq          int       `json:"seq"`
 }
 
@@ -132,6 +133,7 @@ type SubGroupKey struct {
 	ID         uuid.UUID `json:"id"`
 	SubGroupID uuid.UUID `json:"sub_group_id"`
 	Code       string    `json:"code"`
+	Value      string    `json:"value"`
 	Seq        int       `json:"seq"`
 }
 
