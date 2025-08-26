@@ -13,7 +13,7 @@ func RegisterRoutes(ctx *gin.Engine) {
 	//price
 	price := ctx.Group("/price")
 
-	price.POST("/GetPriceList", func(c *gin.Context) {
+	price.POST("/GetPriceListGroup", func(c *gin.Context) {
 		utils.ProcessRequest(c, priceService.GetPriceListGroup)
 	})
 	price.POST("/GetPaymentTerm", func(c *gin.Context) {
