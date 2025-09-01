@@ -1,0 +1,5 @@
+package priceService
+
+func VerifyInventoryLogic() {
+
+}
