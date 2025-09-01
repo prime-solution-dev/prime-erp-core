@@ -11,11 +11,16 @@ import (
 )
 
 type VerifyApproveRequest struct {
-	IsVerifyPrice       bool     `json:"is_verify_price"`
-	IsVerifyExpiryPrice bool     `json:"is_verify_expiry_price"`
-	IsVerifyInventory   bool     `json:"is_verify_inventory"`
-	IsVerifyCredit      bool     `json:"is_verify_credit"`
-	Documents           document `json:"documents"`
+	IsVerifyPrice       bool      `json:"is_verify_price"`
+	IsVerifyExpiryPrice bool      `json:"is_verify_expiry_price"`
+	IsVerifyInventory   bool      `json:"is_verify_inventory"`
+	IsVerifyCredit      bool      `json:"is_verify_credit"`
+	SaleDate            time.Time `json:"sale_date"`
+	CompanyCode         string    `json:"company_code"`
+	SiteCode            string    `json:"site_code"`
+	WarehouseCode       []string  `json:"warehouse_code"`
+	StorageType         []string  `json:"storage_type"`
+	Documents           document  `json:"documents"`
 }
 
 type document struct {
@@ -48,9 +53,30 @@ type VerifyApproveResponse struct {
 func VerifyApprove(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 	req := VerifyApproveRequest{}
 	res := VerifyApproveResponse{}
+	isVerifyWithOldTransportCost := false
 
 	if err := json.Unmarshal([]byte(jsonPayload), &req); err != nil {
 		return nil, errors.New("failed to unmarshal JSON into struct: " + err.Error())
+	}
+
+	if len(req.Documents.DocRef) == 0 {
+		return nil, errors.New("document reference is required")
+	}
+
+	if len(req.Documents.Items) == 0 {
+		return nil, errors.New("require at least one item")
+	}
+
+	if req.SaleDate.IsZero() {
+		return nil, errors.New("sale date is required")
+	}
+
+	if req.CompanyCode == `` {
+		return nil, errors.New("company code is required")
+	}
+
+	if req.SiteCode == `` {
+		return nil, errors.New("site code is required")
 	}
 
 	sqlx, err := db.ConnectSqlx(`prime_erp_sale`)
@@ -79,37 +105,70 @@ func VerifyApprove(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 			WeightUnit:  doc.Weight,
 		}
 
+		//Optional for transport cost verification
+		if isVerifyWithOldTransportCost {
+			item.TransportCostUnit = &doc.TransportCostUnit
+			item.TransportCostUnitWeight = &doc.TransportCostUnitWeight
+		}
+
 		compareReq.Items = append(compareReq.Items, item)
 		compareReq.TotalPrice += doc.TotalPrice
 		compareReq.TotalWeight += doc.Weight
 	}
 
 	//Price Verification
-	compareReq.UnitCode = `PCS`      //TODO: get from config
-	compareReq.UnitCodeWeight = `KG` //TODO: get from config
-	compareReq.TotalTransportCost = 0.0
-	compareRes, err := verifyPrice(compareReq)
-	if err != nil {
-		return nil, err
-	}
+	if req.IsVerifyPrice {
+		compareReq.UnitCode = `PCS`      //TODO: get from config
+		compareReq.UnitCodeWeight = `KG` //TODO: get from config
 
-	if req.IsVerifyPrice && compareRes.IsPassPriceUnitAll == true && compareRes.IsPassPriceWeightAll == true {
-		res.IsPassPrice = false
+		compareReq.TotalTransportCost = 0.0
+		compareRes, err := verifyPrice(compareReq)
+		if err != nil {
+			return nil, err
+		}
+
+		if compareRes.IsPassPriceUnitAll == true && compareRes.IsPassPriceWeightAll == true {
+			res.IsPassPrice = false
+		}
 	}
 
 	//Expiry Price Verification
-	expPriceReq := VerifyExpiryPriceRequest{}
-	expPriceReq.EffectiveDatePrice = req.Documents.EffectiveDatePrice
-	expPrice, err := VerifyExpiryPriceLogic(gormx, expPriceReq)
-	if err != nil {
-		return nil, err
-	}
+	if req.IsVerifyPrice {
+		expPriceReq := VerifyExpiryPriceRequest{}
+		expPriceReq.EffectiveDatePrice = req.Documents.EffectiveDatePrice
+		expPrice, err := VerifyExpiryPriceLogic(gormx, expPriceReq)
+		if err != nil {
+			return nil, err
+		}
 
-	if req.IsVerifyExpiryPrice {
 		res.IsPassExpiryPrice = expPrice.IsPassVerified
 	}
 
-	//TODO: Inventory Verification
+	//Inventory Verification
+	if req.IsVerifyInventory {
+		invReq := VerifyInventoryRequest{}
+		invReq.CompanyCodes = req.CompanyCode
+		invReq.SiteCodes = req.SiteCode
+		invReq.StorageTypes = req.StorageType
+		invReq.WarehouseCodes = req.WarehouseCode
+		invReq.ToDate = &req.SaleDate
+
+		for _, doc := range req.Documents.Items {
+			product := VerifyInventoryProduct{
+				ProductCode: doc.ProductCode,
+				Qty:         doc.Qty,
+			}
+
+			invReq.Products = append(invReq.Products, product)
+		}
+
+		invRes, err := VerifyInventoryLogic(invReq)
+		if err != nil {
+			return nil, err
+		}
+
+		res.IsPassInventory = invRes.IsPassInventory
+	}
 
 	//TODO: Credit Verification
 
@@ -123,5 +182,4 @@ func verifyPrice(compareReq priceService.GetComparePriceRequest) (*priceService.
 	}
 
 	return &compareRes, nil
-
 }
