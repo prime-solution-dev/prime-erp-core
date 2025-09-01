@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"prime-wms-erp-core/Internal/db"
+	"prime-wms-erp-core/Internal/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/prime-solution-dev/prime-erp-core/Internal/db"
-	"github.com/prime-solution-dev/prime-erp-core/Internal/models"
 	"gorm.io/gorm"
 )
 

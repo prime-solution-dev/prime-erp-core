@@ -5,9 +5,10 @@ import (
 	"errors"
 	"time"
 
+	"prime-wms-erp-core/Internal/db"
+	priceService "prime-wms-erp-core/Internal/services/price-service"
+
 	"github.com/gin-gonic/gin"
-	"github.com/prime-solution-dev/prime-erp-core/Internal/db"
-	priceService "github.com/prime-solution-dev/prime-erp-core/Internal/services/price-service"
 )
 
 type VerifyApproveRequest struct {

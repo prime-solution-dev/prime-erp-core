@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/prime-solution-dev/prime-erp-core/config"
+	"prime-wms-erp-core/config"
 )
 
 type GetInventoryAtpRequest struct {
