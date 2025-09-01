@@ -1,4 +1,4 @@
-package priceService
+package approvalService
 
 import (
 	"encoding/json"

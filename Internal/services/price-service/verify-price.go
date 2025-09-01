@@ -1,5 +1,0 @@
-package priceService
-
-func VerifyPriceLoigc() {
-
-}
