@@ -1,12 +1,13 @@
 package routes
 
 import (
-	"github.com/prime-solution-dev/prime-erp-core/internal/utils"
+	"prime-wms-erp-core/internal/utils"
+
+	approvalService "prime-wms-erp-core/Internal/services/approval-service"
+	priceService "prime-wms-erp-core/Internal/services/price-service"
+	quotationService "prime-wms-erp-core/Internal/services/quotation-service"
 
 	"github.com/gin-gonic/gin"
-	approvalService "github.com/prime-solution-dev/prime-erp-core/Internal/services/approval-service"
-	priceService "github.com/prime-solution-dev/prime-erp-core/Internal/services/price-service"
-	quotationService "github.com/prime-solution-dev/prime-erp-core/Internal/services/quotation-service"
 )
 
 func RegisterRoutes(ctx *gin.Engine) {
