@@ -86,24 +86,26 @@ pipeline {
                     sh """ssh -i ${SSH_KEY_PATH} ${REMOTE_USER}@${REMOTE_HOST} docker rmi -f ${IMAGE_NAME}:latest || true"""
                 }
             }
-        }
-        stage('Update .env with DB_PASSWORD') {
-            steps {
-                script {
-                    echo 'Updating .env file with DB_PASSWORD from Jenkins credentials...'
-                    withCredentials([string(credentialsId: 'Jenkinskernaluatserver', variable: 'DB_PASSWORD')]) {
-                        sh """
-                            if [ -f cmd/.env ]; then
-                                sed -i 's|\\\${DB_PASSWORD}|${DB_PASSWORD}|g' cmd/.env
-                                echo '.env updated successfully!'
-                            else
-                                echo '.env file not found!'
-                            fi
-                        """
-                    }
-                }
+        }stage('Update .env with DB_PASSWORD') {
+    steps {
+        script {
+            echo 'Updating .env file with DB_PASSWORD on remote...'
+            withCredentials([string(credentialsId: 'Jenkinskernaluatserver', variable: 'DB_PASSWORD')]) {
+                sh """
+                ssh -i ${SSH_KEY_PATH} ${REMOTE_USER}@${REMOTE_HOST} \\
+                "cd ${REPO_NAME} && \\
+                 if [ -f cmd/.env ]; then \\
+                     sed -i 's|\\\${DB_PASSWORD}|${DB_PASSWORD}|g' cmd/.env && \\
+                     echo '.env updated successfully!' && \\
+                     cat cmd/.env; \\
+                 else \\
+                     echo '.env file not found!'; \\
+                 fi"
+                """
             }
         }
+    }
+}
 stage('Build Docker Image') {
             steps {
                 script {
