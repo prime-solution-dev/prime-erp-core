@@ -6,6 +6,27 @@ import (
 	"github.com/google/uuid"
 )
 
+type CreditRequest struct {
+	ID           uuid.UUID  `json:"id"`
+	RequestCode  string     `json:"request_code"`
+	CustomerCode string     `json:"customer_code"`
+	Amount       float64    `json:"amount"`
+	RequestType  string     `json:"request_type"` // BASE, EXTRA
+	Status       string     `json:"status"`       // PENDING, COMPLETED, CANCELLED, REJECT
+	IsApprove    bool       `json:"is_approve"`
+	Reason       *string    `json:"reason"`
+	EffectiveDTM time.Time  `json:"effective_dtm"`
+	ExpireDTM    *time.Time `json:"expire_dtm"`
+	CreateBy     string     `json:"create_by"`
+	CreateDTM    time.Time  `json:"create_dtm"`
+	UpdateBy     *string    `json:"update_by"`
+	UpdateDTM    *time.Time `json:"update_dtm"`
+}
+
+func (CreditRequest) TableName() string {
+	return "credit_request"
+}
+
 type Credit struct {
 	ID           uuid.UUID  `json:"id"`
 	CustomerCode string     `json:"customer_code"`
