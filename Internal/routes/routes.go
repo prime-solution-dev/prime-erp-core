@@ -1,11 +1,11 @@
 package routes
 
 import (
-	"prime-wms-erp-core/internal/utils"
+	"prime-erp-core/internal/utils"
 
-	approvalService "prime-wms-erp-core/Internal/services/approval-service"
-	priceService "prime-wms-erp-core/Internal/services/price-service"
-	quotationService "prime-wms-erp-core/Internal/services/quotation-service"
+	approvalService "prime-erp-core/Internal/services/approval-service"
+	priceService "prime-erp-core/Internal/services/price-service"
+	quotationService "prime-erp-core/Internal/services/quotation-service"
 
 	"github.com/gin-gonic/gin"
 )

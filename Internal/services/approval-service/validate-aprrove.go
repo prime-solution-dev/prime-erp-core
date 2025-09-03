@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"prime-wms-erp-core/Internal/db"
-	priceService "prime-wms-erp-core/Internal/services/price-service"
+	"prime-erp-core/Internal/db"
+	priceService "prime-erp-core/Internal/services/price-service"
 
 	"github.com/gin-gonic/gin"
 )

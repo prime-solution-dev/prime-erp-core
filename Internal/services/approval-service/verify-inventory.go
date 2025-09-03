@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	externalService "prime-wms-erp-core/External/warehouse-service"
+	externalService "prime-erp-core/External/warehouse-service"
 )
 
 type VerifyInventoryRequest struct {

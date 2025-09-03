@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"prime-wms-erp-core/Internal/db"
-	"prime-wms-erp-core/Internal/models"
+	"prime-erp-core/Internal/db"
+	"prime-erp-core/Internal/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
