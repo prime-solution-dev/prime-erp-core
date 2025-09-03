@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"strings"
 
+	"prime-erp-core/internal/db"
+
 	"github.com/gin-gonic/gin"
-	"github.com/prime-solution-dev/prime-erp-core/Internal/db"
 )
 
 type GetPaymentTermRequest struct {

@@ -8,10 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"prime-erp-core/Internal/db"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/prime-solution-dev/prime-erp-core/Internal/db"
 )
 
 type GetPriceListGroupRequest struct {

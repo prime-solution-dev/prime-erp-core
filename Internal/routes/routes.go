@@ -3,9 +3,10 @@ package routes
 import (
 	"prime-erp-core/internal/utils"
 
-	approvalService "prime-erp-core/Internal/services/approval-service"
-	priceService "prime-erp-core/Internal/services/price-service"
-	quotationService "prime-erp-core/Internal/services/quotation-service"
+	approvalService "prime-erp-core/internal/services/approval-service"
+	creditService "prime-erp-core/internal/services/credit-service"
+	priceService "prime-erp-core/internal/services/price-service"
+	quotationService "prime-erp-core/internal/services/quotation-service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,4 +41,11 @@ func RegisterRoutes(ctx *gin.Engine) {
 	approval.POST("/VerifyApprove", func(c *gin.Context) {
 		utils.ProcessRequest(c, approvalService.VerifyApprove)
 	})
+
+	//credit
+	credit := ctx.Group("/credit")
+	credit.POST("/GetCredit", func(c *gin.Context) {
+		utils.ProcessRequest(c, creditService.GetCredit)
+	})
+
 }
