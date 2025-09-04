@@ -28,7 +28,7 @@ type CreditCustomer struct {
 	Balance      float64 `json:"balance"`
 }
 
-func GetCreditAPI(ctx *gin.Context, jsonPayload string) (interface{}, error) {
+func GetCreditCurrentAPI(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 	req := GetCreditRequest{}
 
 	if err := json.Unmarshal([]byte(jsonPayload), &req); err != nil {
@@ -45,10 +45,10 @@ func GetCreditAPI(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 		return nil, fmt.Errorf("require at least one customer code")
 	}
 
-	return GetCredit(sqlx, req)
+	return GetCreditCurrent(sqlx, req)
 }
 
-func GetCredit(sqlx *sqlx.DB, req GetCreditRequest) (*GetCreditResponse, error) {
+func GetCreditCurrent(sqlx *sqlx.DB, req GetCreditRequest) (*GetCreditResponse, error) {
 	res := GetCreditResponse{}
 	customerCheck := map[string]bool{}
 	customerStrs := []string{}

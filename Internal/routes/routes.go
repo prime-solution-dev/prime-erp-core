@@ -44,8 +44,8 @@ func RegisterRoutes(ctx *gin.Engine) {
 
 	//credit
 	credit := ctx.Group("/credit")
-	credit.POST("/GetCredit", func(c *gin.Context) {
-		utils.ProcessRequest(c, creditService.GetCreditAPI)
+	credit.POST("/GetCreditCurrent", func(c *gin.Context) {
+		utils.ProcessRequest(c, creditService.GetCreditCurrentAPI)
 	})
 
 }
