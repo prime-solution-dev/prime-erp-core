@@ -32,13 +32,13 @@ func VerifyExpiryPrice(ctx *gin.Context, jsonPayload string) (interface{}, error
 		return nil, errors.New("failed to unmarshal JSON into struct: " + err.Error())
 	}
 
-	sqlx, err := db.ConnectSqlx(`prime_erp_sale`)
+	sqlx, err := db.ConnectSqlx(`prime_erp`)
 	if err != nil {
 		return nil, err
 	}
 	defer sqlx.Close()
 
-	gormx, err := db.ConnectGORM(`prime_erp_sale`)
+	gormx, err := db.ConnectGORM(`prime_erp`)
 	if err != nil {
 		return nil, err
 	}

@@ -30,7 +30,7 @@ func GetPaymentTerm(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 		return nil, errors.New("failed to unmarshal JSON into struct: " + err.Error())
 	}
 
-	sqlx, err := db.ConnectSqlx(`prime_erp_sale`)
+	sqlx, err := db.ConnectSqlx(`prime_erp`)
 	if err != nil {
 		return nil, err
 	}

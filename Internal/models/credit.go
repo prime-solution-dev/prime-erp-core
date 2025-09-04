@@ -11,35 +11,34 @@ type CreditRequest struct {
 	RequestCode  string     `json:"request_code"`
 	CustomerCode string     `json:"customer_code"`
 	Amount       float64    `json:"amount"`
-	RequestType  string     `json:"request_type"` // BASE, EXTRA
-	Status       string     `json:"status"`       // PENDING, COMPLETED, CANCELLED, REJECT
+	RequestType  string     `json:"request_type"`
+	Status       string     `json:"status"`
 	IsApprove    bool       `json:"is_approve"`
-	Reason       *string    `json:"reason"`
-	EffectiveDTM time.Time  `json:"effective_dtm"`
-	ExpireDTM    *time.Time `json:"expire_dtm"`
+	Reason       string     `json:"reason"`
+	EffectiveDtm *time.Time `json:"effective_dtm"`
+	ExpireDtm    *time.Time `json:"expire_dtm"`
+	RequestDate  *time.Time `json:"request_date"`
+	ActionDate   *time.Time `json:"action_date"`
 	CreateBy     string     `json:"create_by"`
-	CreateDTM    time.Time  `json:"create_dtm"`
-	UpdateBy     *string    `json:"update_by"`
-	UpdateDTM    *time.Time `json:"update_dtm"`
+	CreateDtm    *time.Time `json:"create_dtm"`
+	UpdateBy     string     `json:"update_by"`
+	UpdateDate   *time.Time `json:"update_date"`
 }
 
-func (CreditRequest) TableName() string {
-	return "credit_request"
-}
+func (CreditRequest) TableName() string { return "credit_request" }
 
 type Credit struct {
 	ID           uuid.UUID  `json:"id"`
 	CustomerCode string     `json:"customer_code"`
 	Amount       float64    `json:"amount"`
-	EffectiveDTM time.Time  `json:"effective_dtm"`
+	EffectiveDtm *time.Time `json:"effective_dtm"`
 	IsActive     bool       `json:"is_active"`
-	DocRef       *string    `json:"doc_ref"`
+	DocRef       string     `json:"doc_ref"`
+	ApproveDate  *time.Time `json:"approve_date"`
 	CreateBy     string     `json:"create_by"`
-	CreateDTM    time.Time  `json:"create_dtm"`
-	UpdateBy     *string    `json:"update_by"`
-	UpdateDTM    *time.Time `json:"update_dtm"`
-
-	Extras []CreditExtra `json:"extras"`
+	CreateDtm    *time.Time `json:"create_dtm"`
+	UpdateBy     string     `json:"update_by"`
+	UpdateDate   *time.Time `json:"update_date"`
 }
 
 func (Credit) TableName() string { return "credit" }
@@ -49,13 +48,14 @@ type CreditExtra struct {
 	CreditID     uuid.UUID  `json:"credit_id"`
 	ExtraType    string     `json:"extra_type"`
 	Amount       float64    `json:"amount"`
-	EffectiveDTM time.Time  `json:"effective_dtm"`
-	ExpireDTM    time.Time  `json:"expire_dtm"`
-	DocRef       *string    `json:"doc_ref"`
+	EffectiveDtm *time.Time `json:"effective_dtm"`
+	ExpireDtm    *time.Time `json:"expire_dtm"`
+	DocRef       string     `json:"doc_ref"`
+	ApproveDate  *time.Time `json:"approve_date"`
 	CreateBy     string     `json:"create_by"`
-	CreateDTM    time.Time  `json:"create_dtm"`
-	UpdateBy     *string    `json:"update_by"`
-	UpdateDTM    *time.Time `json:"update_dtm"`
+	CreateDtm    *time.Time `json:"create_dtm"`
+	UpdateBy     string     `json:"update_by"`
+	UpdateDate   *time.Time `json:"update_date"`
 }
 
 func (CreditExtra) TableName() string { return "credit_extra" }
@@ -66,16 +66,17 @@ type CreditTransaction struct {
 	TransactionType string     `json:"transaction_type"`
 	Amount          float64    `json:"amount"`
 	AdjustAmount    float64    `json:"adjust_amount"`
-	EffectiveDTM    time.Time  `json:"effective_dtm"`
-	ExpireDTM       *time.Time `json:"expire_dtm"`
-	ForceExpireDTM  *time.Time `json:"force_expire_dtm"`
+	EffectiveDtm    *time.Time `json:"effective_dtm"`
+	ExpireDtm       *time.Time `json:"expire_dtm"`
+	ForceExpireDtm  *time.Time `json:"force_expire_dtm"`
 	IsApprove       bool       `json:"is_approve"`
 	Status          string     `json:"status"`
-	Reason          *string    `json:"reason"`
+	Reason          string     `json:"reason"`
+	ApproveDate     *time.Time `json:"approve_date"`
 	CreateBy        string     `json:"create_by"`
-	CreateDTM       time.Time  `json:"create_dtm"`
-	UpdateBy        *string    `json:"update_by"`
-	UpdateDTM       *time.Time `json:"update_dtm"`
+	CreateDtm       *time.Time `json:"create_dtm"`
+	UpdateBy        string     `json:"update_by"`
+	UpdateDate      *time.Time `json:"update_date"`
 }
 
 func (CreditTransaction) TableName() string { return "credit_transaction" }

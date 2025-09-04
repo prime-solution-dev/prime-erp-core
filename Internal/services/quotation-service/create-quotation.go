@@ -35,7 +35,7 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 		return nil, errors.New("failed to unmarshal JSON into struct: " + err.Error())
 	}
 
-	gormx, err := db.ConnectGORM(`prime_erp_sale`)
+	gormx, err := db.ConnectGORM(`prime_erp`)
 	if err != nil {
 		return nil, err
 	}

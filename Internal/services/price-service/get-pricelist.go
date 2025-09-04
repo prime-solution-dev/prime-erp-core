@@ -103,7 +103,7 @@ func GetPriceListGroup(ctx *gin.Context, jsonPayload string) (interface{}, error
 		return nil, errors.New("failed to unmarshal JSON into struct: " + err.Error())
 	}
 
-	sqlx, err := db.ConnectSqlx(`prime_erp_sale`)
+	sqlx, err := db.ConnectSqlx(`prime_erp`)
 	if err != nil {
 		return nil, err
 	}
@@ -274,7 +274,7 @@ func getGroupSubGroup(sqlx *sqlx.DB, req GetPriceListGroupRequest) ([]GetPriceLi
 				select 0
 				from price_list_group plgx
 				left join price_list_sub_group plsgx on plgx.id = plsgx.price_list_group_id 
-				left join sub_group_key sgkx on sgkx.sub_group_id = plsgx.id
+				left join price_list_sub_group_key sgkx on sgkx.sub_group_id = plsgx.id
 				where 1=1
 					and plgx.id = plg.id
 					and sgkx.code in ('%s')
@@ -397,7 +397,7 @@ func getGroupSubGroup(sqlx *sqlx.DB, req GetPriceListGroupRequest) ([]GetPriceLi
 	if len(groupIDs) > 0 {
 		queryKeys := fmt.Sprintf(`
 			SELECT sub_group_id, code, value, seq
-			FROM sub_group_key
+			FROM price_list_sub_group_key
 			WHERE sub_group_id IN ('%s')
 		`, strings.Join(groupIDs, "','"))
 

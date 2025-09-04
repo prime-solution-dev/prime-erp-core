@@ -6,9 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
-type Quotation struct {
+type Sale struct {
 	ID                  uuid.UUID  `json:"id"`
-	QuotationCode       string     `json:"quotation_code"`
+	SaleCode            string     `json:"sale_code"`
 	CustomerCode        string     `json:"customer_code"`
 	CustomerName        string     `json:"customer_name"`
 	DeliveryDate        *time.Time `json:"delivery_date"`
@@ -24,7 +24,6 @@ type Quotation struct {
 	TotalTransportCost  float64    `json:"total_transport_cost"`
 	TotalPrice          float64    `json:"total_price"`
 	TotalWeight         float64    `json:"total_weight"`
-	PassPrice           bool       `json:"pass_price"`
 	TotalNetPrice       float64    `json:"total_net_price"`
 	TotalNetPriceWeight float64    `json:"total_net_price_weight"`
 	PaymentMethod       string     `json:"payment_method"`
@@ -38,6 +37,7 @@ type Quotation struct {
 	PassCreditLimit     string     `json:"pass_credit_limit"`
 	PassPriceExpire     string     `json:"pass_price_expire"`
 	Status              string     `json:"status"`
+	StatusPayment       string     `json:"status_payment"`
 	Remark              string     `json:"remark"`
 	IsApproved          bool       `json:"is_approved"`
 	StatusApprove       string     `json:"status_approve"`
@@ -47,22 +47,23 @@ type Quotation struct {
 	UpdateBy            string     `json:"update_by"`
 }
 
-func (Quotation) TableName() string { return "quotation" }
+func (Sale) TableName() string { return "sale" }
 
-type QuotationItem struct {
+type SaleItem struct {
 	ID                      uuid.UUID  `json:"id"`
-	QuotationID             uuid.UUID  `json:"quotation_id"`
-	QuotationItem           string     `json:"quotation_item"`
+	SaleID                  uuid.UUID  `json:"sale_id"`
+	SaleItem                string     `json:"sale_item"`
 	ProductCode             string     `json:"product_code"`
 	ProductDesc             string     `json:"product_desc"`
 	Qty                     float64    `json:"qty"`
+	OriginQty               float64    `json:"origin_qty"`
 	Unit                    string     `json:"unit"`
 	PriceListUnit           float64    `json:"price_list_unit"`
 	SaleQty                 float64    `json:"sale_qty"`
 	SaleUnit                string     `json:"sale_unit"`
 	SaleUnitType            string     `json:"sale_unit_type"`
-	PassPrice               string     `json:"pass_price"`
-	PassWeight              string     `json:"pass_weight"`
+	PassPriceUnit           string     `json:"pass_price_unit"`
+	PassPriceWeight         string     `json:"pass_price_weight"`
 	PriceUnit               float64    `json:"price_unit"`
 	TotalPrice              float64    `json:"total_price"`
 	TransportCostUnit       float64    `json:"transport_cost_unit"`
@@ -82,4 +83,4 @@ type QuotationItem struct {
 	UpdateBy                string     `json:"update_by"`
 }
 
-func (QuotationItem) TableName() string { return "quotation_item" }
+func (SaleItem) TableName() string { return "sale_item" }
