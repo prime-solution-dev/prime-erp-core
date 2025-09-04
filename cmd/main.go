@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"prime-erp-core/Internal/routes"
 	"prime-erp-core/internal/middleware"
+	"prime-erp-core/internal/routes"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

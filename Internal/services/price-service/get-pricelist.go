@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"prime-erp-core/Internal/db"
+	"prime-erp-core/internal/db"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
