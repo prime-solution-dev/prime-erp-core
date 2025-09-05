@@ -15,6 +15,7 @@ type Deposit struct {
 	DepositDate  *time.Time `json:"deposit_date"`
 	AmountTotal  float64    `json:"amount_total"`
 	AmountUsed   float64    `json:"amount_used"`
+	AmountRemain float64    `json:"amount_remain"`
 	Status       string     `json:"status"`
 	Remark       string     `json:"remark"`
 	CreateBy     string     `json:"create_by"`

@@ -3,9 +3,11 @@ package approvalService
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"prime-erp-core/internal/db"
+	approvalService "prime-erp-core/internal/services/approval-service"
 	priceService "prime-erp-core/internal/services/price-service"
 
 	"github.com/gin-gonic/gin"
@@ -172,6 +174,30 @@ func VerifyApprove(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 	}
 
 	//TODO: Credit Verification
+	if req.IsVerifyCredit {
+		creditReq := approvalService.VerifyCreditRequest{}
+		creditReq.Customers = append(creditReq.Customers, approvalService.VerifyCreditCustomer{CustomerCode: req.Documents.CustomerCode})
+
+		creditCustomer, err := VerifyCreditLogic(sqlx, creditReq)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(creditCustomer.Customers) == 0 {
+			return nil, fmt.Errorf(`not found credit customer`)
+		}
+
+		res.IsPassCredit = true
+
+		for _, creditCust := range creditCustomer.Customers {
+			if creditCust.CustomerCode == req.Documents.CustomerCode {
+				if !creditCust.IsPass {
+					res.IsPassCredit = false
+					break
+				}
+			}
+		}
+	}
 
 	return res, nil
 }
