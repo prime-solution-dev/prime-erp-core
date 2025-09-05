@@ -174,9 +174,11 @@ func calculateTransportCost(itemValue, totalValue, totalTransport float64, exist
 	if existing != nil && *existing > 0 {
 		return existing
 	}
+
 	if totalValue > 0 {
 		return float64Ptr(round2(itemValue / totalValue * totalTransport))
 	}
+
 	return float64Ptr(0)
 }
 
@@ -226,5 +228,6 @@ func float64Val(p *float64) float64 {
 	if p != nil {
 		return *p
 	}
+
 	return 0
 }

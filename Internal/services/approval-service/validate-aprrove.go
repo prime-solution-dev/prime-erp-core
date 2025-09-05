@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"prime-erp-core/internal/db"
-	approvalService "prime-erp-core/internal/services/approval-service"
 	priceService "prime-erp-core/internal/services/price-service"
 
 	"github.com/gin-gonic/gin"
@@ -173,10 +172,10 @@ func VerifyApprove(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 		res.IsPassInventory = invRes.IsPassInventory
 	}
 
-	//TODO: Credit Verification
+	//Credit Verification
 	if req.IsVerifyCredit {
-		creditReq := approvalService.VerifyCreditRequest{}
-		creditReq.Customers = append(creditReq.Customers, approvalService.VerifyCreditCustomer{CustomerCode: req.Documents.CustomerCode})
+		creditReq := VerifyCreditRequest{}
+		creditReq.Customers = append(creditReq.Customers, VerifyCreditCustomer{CustomerCode: req.Documents.CustomerCode})
 
 		creditCustomer, err := VerifyCreditLogic(sqlx, creditReq)
 		if err != nil {
