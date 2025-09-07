@@ -71,6 +71,26 @@ func VerifyApprove(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 		return nil, errors.New("failed to unmarshal JSON into struct: " + err.Error())
 	}
 
+	sqlx, err := db.ConnectSqlx(`prime_erp`)
+	if err != nil {
+		return nil, err
+	}
+	defer sqlx.Close()
+
+	gormx, err := db.ConnectGORM(`prime_erp`)
+	if err != nil {
+		return nil, err
+	}
+	defer db.CloseGORM(gormx)
+
+	return VerifyApproveLogic(gormx, sqlx, req)
+}
+
+func VerifyApproveLogic(gormx *gorm.DB, sqlx *sqlx.DB, req VerifyApproveRequest) (*VerifyApproveResponse, error) {
+	res := VerifyApproveResponse{
+		Documents: []VerifyApproveDocument{},
+	}
+
 	if len(req.Documents) == 0 {
 		return nil, errors.New("document reference is required")
 	}
@@ -91,26 +111,6 @@ func VerifyApprove(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 
 	if req.SiteCode == `` {
 		return nil, errors.New("site code is required")
-	}
-
-	sqlx, err := db.ConnectSqlx(`prime_erp`)
-	if err != nil {
-		return nil, err
-	}
-	defer sqlx.Close()
-
-	gormx, err := db.ConnectGORM(`prime_erp`)
-	if err != nil {
-		return nil, err
-	}
-	defer db.CloseGORM(gormx)
-
-	return VerifyApproveLogic(gormx, sqlx, req)
-}
-
-func VerifyApproveLogic(gormx *gorm.DB, sqlx *sqlx.DB, req VerifyApproveRequest) (*VerifyApproveResponse, error) {
-	res := VerifyApproveResponse{
-		Documents: []VerifyApproveDocument{},
 	}
 
 	isVerifyWithOldTransportCost := false
