@@ -9,6 +9,8 @@ import (
 type Sale struct {
 	ID                          uuid.UUID  `json:"id"`
 	SaleCode                    string     `json:"sale_code"`
+	CompanyCode                 string     `json:"company_code"`
+	SiteCode                    string     `json:"site_code"`
 	CustomerCode                string     `json:"customer_code"`
 	CustomerName                string     `json:"customer_name"`
 	DeliveryDate                *time.Time `json:"delivery_date"`

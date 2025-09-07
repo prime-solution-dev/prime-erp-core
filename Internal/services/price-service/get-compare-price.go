@@ -41,8 +41,6 @@ type ItemComparePrice struct {
 	PriceListUnit           float64  `json:"price_list"`
 	PriceUnit               float64  `json:"price"`
 	TotalAmount             float64  `json:"total_amount"`
-	WeightUnit              float64  `json:"weight_unit"`
-	AvgWeightUnit           float64  `json:"avg_weight_unit"`
 	TotalWeight             float64  `json:"total_weight"`
 	TransportCostUnit       *float64 `json:"transport_cost_unit"`
 	TransportCostUnitWeight *float64 `json:"transport_cost_unit_weight"`

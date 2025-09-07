@@ -15,28 +15,24 @@ import (
 )
 
 type VerifyExpiryPriceRequest struct {
+	DocumentRef        string    `json:"document_ref"`
 	EffectiveDatePrice time.Time `json:"effective_date_price"`
 }
 
 type VerifyExpiryPriceResponse struct {
 	IsPassVerified     bool      `json:"is_pass_verified"`
+	DocumentRef        string    `json:"document_ref"`
 	EffectiveDatePrice time.Time `json:"effective_date_price"`
 	ExpiryDay          int64     `json:"expiry_day"`
 	ExpireDate         time.Time `json:"expire_date"`
 }
 
 func VerifyExpiryPrice(ctx *gin.Context, jsonPayload string) (interface{}, error) {
-	req := VerifyExpiryPriceRequest{}
+	req := []VerifyExpiryPriceRequest{}
 
 	if err := json.Unmarshal([]byte(jsonPayload), &req); err != nil {
 		return nil, errors.New("failed to unmarshal JSON into struct: " + err.Error())
 	}
-
-	sqlx, err := db.ConnectSqlx(`prime_erp`)
-	if err != nil {
-		return nil, err
-	}
-	defer sqlx.Close()
 
 	gormx, err := db.ConnectGORM(`prime_erp`)
 	if err != nil {
@@ -47,8 +43,8 @@ func VerifyExpiryPrice(ctx *gin.Context, jsonPayload string) (interface{}, error
 	return VerifyExpiryPriceLogic(gormx, req)
 }
 
-func VerifyExpiryPriceLogic(gormx *gorm.DB, req VerifyExpiryPriceRequest) (*VerifyExpiryPriceResponse, error) {
-	res := VerifyExpiryPriceResponse{}
+func VerifyExpiryPriceLogic(gormx *gorm.DB, req []VerifyExpiryPriceRequest) (*[]VerifyExpiryPriceResponse, error) {
+	res := []VerifyExpiryPriceResponse{}
 
 	topic := `PRICE`
 	configCodes := []string{`EXPIRY_PRICE_DAYS`}
@@ -67,15 +63,24 @@ func VerifyExpiryPriceLogic(gormx *gorm.DB, req VerifyExpiryPriceRequest) (*Veri
 		return nil, errors.New("failed to convert expiry days to int64: " + err.Error())
 	}
 
-	expiryDate := time.Now().AddDate(0, 0, int(expiryDays))
-	res.ExpiryDay = expiryDays
-	res.EffectiveDatePrice = req.EffectiveDatePrice
-	res.ExpireDate = expiryDate
+	for _, itemReq := range req {
+		expiryDate := time.Now().AddDate(0, 0, int(expiryDays))
 
-	if req.EffectiveDatePrice.Before(expiryDate) {
-		res.IsPassVerified = true
-	} else {
-		res.IsPassVerified = false
+		newRes := VerifyExpiryPriceResponse{
+			IsPassVerified:     false,
+			DocumentRef:        itemReq.DocumentRef,
+			EffectiveDatePrice: itemReq.EffectiveDatePrice,
+			ExpiryDay:          expiryDays,
+			ExpireDate:         expiryDate,
+		}
+
+		if newRes.EffectiveDatePrice.Before(expiryDate) {
+			newRes.IsPassVerified = true
+		} else {
+			newRes.IsPassVerified = false
+		}
+
+		res = append(res, newRes)
 	}
 
 	return &res, nil

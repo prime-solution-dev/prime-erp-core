@@ -8,8 +8,8 @@ import (
 )
 
 type VerifyInventoryRequest struct {
-	CompanyCodes   string                   `json:"company_codes"`
-	SiteCodes      string                   `json:"site_codes"`
+	CompanyCode    string                   `json:"company_code"`
+	SiteCode       string                   `json:"site_code"`
 	WarehouseCodes []string                 `json:"warehouse_codes"`
 	StorageTypes   []string                 `json:"storage_types"`
 	Products       []VerifyInventoryProduct `json:"products"`
@@ -22,11 +22,23 @@ type VerifyInventoryProduct struct {
 }
 
 type VerifyInventoryResponse struct {
-	IsPassInventory bool `json:"is_pass_inventory"`
+	IsPassInventory bool                        `json:"is_pass_inventory"`
+	ProductAtps     []VerifyInventoryProductAtp `json:"product_atps"`
+}
+
+type VerifyInventoryProductAtp struct {
+	CompanyCode   string `json:"company_code"`
+	SiteCode      string `json:"site_code"`
+	ProductCode   string `json:"product_code"`
+	WarehouseCode string `json:"warehouse_code"`
+	TodayStockQty int    `json:"current_stock_qty"`
+	TodayAtpQty   int    `json:"current_atp_qty"`
+	TotalAtpQty   int    `json:"atp_qty"`
 }
 
 func VerifyInventoryLogic(req VerifyInventoryRequest) (*VerifyInventoryResponse, error) {
 	res := &VerifyInventoryResponse{}
+	res.IsPassInventory = true
 
 	if len(req.Products) == 0 {
 		return res, fmt.Errorf("require at least one product")
@@ -34,8 +46,8 @@ func VerifyInventoryLogic(req VerifyInventoryRequest) (*VerifyInventoryResponse,
 
 	productExists := map[string]bool{}
 	reqAtp := externalService.GetInventoryAtpRequest{
-		CompanyCodes: []string{req.CompanyCodes},
-		SiteCodes:    []string{req.SiteCodes},
+		CompanyCodes: []string{req.CompanyCode},
+		SiteCodes:    []string{req.SiteCode},
 		StorageTypes: req.StorageTypes,
 		ToDate:       req.ToDate,
 	}
@@ -58,22 +70,44 @@ func VerifyInventoryLogic(req VerifyInventoryRequest) (*VerifyInventoryResponse,
 
 	remainingATP := map[string]float64{}
 	for _, atp := range resAtp.ProductAtps {
-		remainingATP[atp.ProductCode] += float64(atp.TodayAtpQty)
+		atpKey := fmt.Sprintf(`%s|%s|%s`, atp.CompanyCode, atp.SiteCode, atp.ProductCode)
+		remainingATP[atpKey] += float64(atp.TodayAtpQty)
+
+		res.ProductAtps = append(res.ProductAtps, VerifyInventoryProductAtp{
+			CompanyCode:   atp.CompanyCode,
+			SiteCode:      atp.SiteCode,
+			ProductCode:   atp.ProductCode,
+			WarehouseCode: atp.WarehouseCode,
+			TodayStockQty: atp.TodayStockQty,
+			TodayAtpQty:   atp.TodayAtpQty,
+			TotalAtpQty:   atp.TotalAtpQty,
+		})
 	}
 
 	for _, p := range req.Products {
-		if p.Qty <= 0 {
-			continue
+		atpKey := fmt.Sprintf(`%s|%s|%s`, req.CompanyCode, req.SiteCode, p.ProductCode)
+		remain, existAtp := remainingATP[atpKey]
+		if !existAtp {
+			remain = 0
 		}
 
-		if remainingATP[p.ProductCode] >= p.Qty {
-			remainingATP[p.ProductCode] -= p.Qty
-		} else {
+		if remain < p.Qty {
 			res.IsPassInventory = false
-			return res, nil
+			break
 		}
+
+		use := min(p.Qty, remain)
+		remain -= use
+		remainingATP[atpKey] = remain
 	}
 
-	res.IsPassInventory = true
 	return res, nil
+}
+
+func min(a float64, b float64) float64 {
+	if a > b {
+		return a
+	}
+
+	return b
 }
