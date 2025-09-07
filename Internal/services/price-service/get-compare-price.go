@@ -11,7 +11,7 @@ import (
 )
 
 type GetComparePriceRequest struct {
-	TotalPrice         float64            `json:"total_price"`
+	TotalAmount        float64            `json:"total_amount"`
 	TotalWeight        float64            `json:"total_weight"`
 	TotalTransportCost float64            `json:"transport_cost"`
 	UnitCode           string             `json:"unit_code"`        // PCS
@@ -20,15 +20,15 @@ type GetComparePriceRequest struct {
 }
 
 type GetComparePriceResponse struct {
-	TotalPrice           float64            `json:"total_price"`
-	TotalWeight          float64            `json:"total_weight"`
-	TotalTransportCost   float64            `json:"total_transport_cost"`
-	TotalNetPrice        float64            `json:"total_net_price"`
-	AvgNetPriceUnit      float64            `json:"avg_net_price_unit"`
-	AvgNetPriceWeight    float64            `json:"avg_net_price_weight"`
-	IsPassPriceUnitAll   bool               `json:"is_pass_price_unit_all"`
-	IsPassPriceWeightAll bool               `json:"is_pass_price_weight_all"`
-	Items                []ItemComparePrice `json:"items"`
+	TotalAmount                 float64            `json:"total_amount"`
+	TotalWeight                 float64            `json:"total_weight"`
+	TotalTransportCost          float64            `json:"total_transport_cost"`
+	SubtotalExclTransport       float64            `json:"subtotal_excl_transport"`
+	AvgPriceUnitExclTransport   float64            `json:"avg_price_unit_excl_transport"`
+	AvgPriceWeightExclTransport float64            `json:"avg_price_weight_excl_transport"`
+	IsPassPriceUnitAll          bool               `json:"is_pass_price_unit_all"`
+	IsPassPriceWeightAll        bool               `json:"is_pass_price_weight_all"`
+	Items                       []ItemComparePrice `json:"items"`
 }
 
 type ItemComparePrice struct {
@@ -40,7 +40,7 @@ type ItemComparePrice struct {
 	SaleUnitType            string   `json:"sale_unit_type"`
 	PriceListUnit           float64  `json:"price_list"`
 	PriceUnit               float64  `json:"price"`
-	TotalPrice              float64  `json:"total_price"`
+	TotalAmount             float64  `json:"total_amount"`
 	WeightUnit              float64  `json:"weight_unit"`
 	AvgWeightUnit           float64  `json:"avg_weight_unit"`
 	TotalWeight             float64  `json:"total_weight"`
@@ -48,14 +48,14 @@ type ItemComparePrice struct {
 	TransportCostUnitWeight *float64 `json:"transport_cost_unit_weight"`
 
 	// Results
-	TotalNetPrice       float64 `json:"total_net_price"`
-	NetPriceUnit        float64 `json:"net_price_unit"`
-	PriceDiffUnit       float64 `json:"price_diff_unit"`
-	IsPassPriceUnit     bool    `json:"is_pass_price_unit"`
-	TotalNetPriceWeight float64 `json:"total_net_price_weight"`
-	NetPriceUnitWeight  float64 `json:"net_price_unit_weight"`
-	PriceDiffUnitWeight float64 `json:"price_diff_unit_weight"`
-	IsPassPriceWeight   bool    `json:"is_pass_price_weight"`
+	SubtotalExclTransport          float64 `json:"subtotal_excl_transport"`
+	NetPriceUnitExclTransport      float64 `json:"net_price_unit_excl_transport"`
+	PriceDiffUnit                  float64 `json:"price_diff_unit"`
+	IsPassPriceUnit                bool    `json:"is_pass_price_unit"`
+	SubtotalWeightExclTransport    float64 `json:"subtotal_weight_excl_transport"`
+	NetPricePerWeightExclTransport float64 `json:"net_price_per_weight_excl_transport"`
+	PriceDiffUnitWeight            float64 `json:"price_diff_unit_weight"`
+	IsPassPriceWeight              bool    `json:"is_pass_price_weight"`
 }
 
 func GetComparePrice(ctx *gin.Context, jsonPayload string) (interface{}, error) {
@@ -73,7 +73,7 @@ func ComparePrice(req GetComparePriceRequest) (GetComparePriceResponse, error) {
 		return res, fmt.Errorf("items is required")
 	}
 
-	totalPriceAll := req.TotalPrice
+	totalPriceAll := req.TotalAmount
 	totalWeightAll := req.TotalWeight
 	totalTransportCostAll := req.TotalTransportCost
 	unitCode := req.UnitCode
@@ -86,7 +86,7 @@ func ComparePrice(req GetComparePriceRequest) (GetComparePriceResponse, error) {
 	for _, item := range req.Items {
 		newItem := item
 
-		newItem.TransportCostUnit = calculateTransportCost(item.TotalPrice, totalPriceAll, totalTransportCostAll, item.TransportCostUnit)
+		newItem.TransportCostUnit = calculateTransportCost(item.TotalAmount, totalPriceAll, totalTransportCostAll, item.TransportCostUnit)
 		sumTransportUnit += float64Val(newItem.TransportCostUnit)
 
 		newItem.TransportCostUnitWeight = calculateTransportCost(item.TotalWeight, totalWeightAll, totalTransportCostAll, item.TransportCostUnitWeight)
@@ -96,7 +96,7 @@ func ComparePrice(req GetComparePriceRequest) (GetComparePriceResponse, error) {
 	}
 
 	sort.SliceStable(res.Items, func(i, j int) bool {
-		return res.Items[i].TotalPrice > res.Items[j].TotalPrice
+		return res.Items[i].TotalAmount > res.Items[j].TotalAmount
 	})
 
 	//  Adjust Transport Cost Unit to match total
@@ -104,7 +104,7 @@ func ComparePrice(req GetComparePriceRequest) (GetComparePriceResponse, error) {
 	adjustTransportCosts(res.Items, totalTransportCostAll, &sumTransportUnitWeight, false)
 
 	//  Calculate net price
-	var totalNetPrice, totalNetPriceWeight float64
+	var subtotalExclTransport, subtotalExclTransportWeight float64
 	passUnitAll := true
 	passWeightAll := true
 
@@ -112,16 +112,16 @@ func ComparePrice(req GetComparePriceRequest) (GetComparePriceResponse, error) {
 		item := res.Items[i]
 
 		//Unit
-		item.TotalNetPrice = round2(item.TotalPrice - float64Val(item.TransportCostUnit))
+		item.SubtotalExclTransport = round2(item.TotalAmount - float64Val(item.TransportCostUnit))
 		if item.SaleUnit == unitCode && item.Qty > 0 {
-			item.NetPriceUnit = round2(item.TotalNetPrice / item.Qty)
+			item.NetPriceUnitExclTransport = round2(item.SubtotalExclTransport / item.Qty)
 		} else if item.SaleUnit == unitCodeWeight && item.TotalWeight > 0 {
-			item.NetPriceUnit = round2(item.TotalNetPrice / item.TotalWeight)
+			item.NetPriceUnitExclTransport = round2(item.SubtotalExclTransport / item.TotalWeight)
 		} else {
-			item.NetPriceUnit = 0
+			item.NetPriceUnitExclTransport = 0
 		}
 
-		item.PriceDiffUnit = round2(item.NetPriceUnit - item.PriceListUnit)
+		item.PriceDiffUnit = round2(item.NetPriceUnitExclTransport - item.PriceListUnit)
 		item.IsPassPriceUnit = item.PriceDiffUnit >= 0
 
 		if !item.IsPassPriceUnit {
@@ -129,16 +129,16 @@ func ComparePrice(req GetComparePriceRequest) (GetComparePriceResponse, error) {
 		}
 
 		//Weight
-		item.TotalNetPriceWeight = round2(item.TotalPrice - float64Val(item.TransportCostUnitWeight))
+		item.SubtotalWeightExclTransport = round2(item.TotalAmount - float64Val(item.TransportCostUnitWeight))
 		if item.SaleUnit == unitCode && item.Qty > 0 {
-			item.NetPriceUnitWeight = round2(item.TotalNetPriceWeight / item.Qty)
+			item.NetPricePerWeightExclTransport = round2(item.SubtotalWeightExclTransport / item.Qty)
 		} else if item.SaleUnit == unitCodeWeight && item.TotalWeight > 0 {
-			item.NetPriceUnitWeight = round2(item.TotalNetPriceWeight / item.TotalWeight)
+			item.NetPricePerWeightExclTransport = round2(item.SubtotalWeightExclTransport / item.TotalWeight)
 		} else {
-			item.NetPriceUnitWeight = 0
+			item.NetPricePerWeightExclTransport = 0
 		}
 
-		item.PriceDiffUnitWeight = round2(item.NetPriceUnitWeight - item.PriceListUnit)
+		item.PriceDiffUnitWeight = round2(item.NetPricePerWeightExclTransport - item.PriceListUnit)
 		item.IsPassPriceWeight = item.PriceDiffUnitWeight >= 0
 
 		if !item.IsPassPriceWeight {
@@ -147,21 +147,21 @@ func ComparePrice(req GetComparePriceRequest) (GetComparePriceResponse, error) {
 
 		// Update slice and totals
 		res.Items[i] = item
-		totalNetPrice += item.TotalNetPrice
-		totalNetPriceWeight += item.TotalNetPriceWeight
+		subtotalExclTransport += item.SubtotalExclTransport
+		subtotalExclTransportWeight += item.SubtotalWeightExclTransport
 	}
 
 	//Summary
-	res.TotalPrice = round2(totalPriceAll)
+	res.TotalAmount = round2(totalPriceAll)
 	res.TotalWeight = round2(totalWeightAll)
 	res.TotalTransportCost = round2(totalTransportCostAll)
-	res.TotalNetPrice = round2(totalNetPrice)
+	res.SubtotalExclTransport = round2(subtotalExclTransport)
 
 	if totalWeightAll > 0 {
-		res.AvgNetPriceWeight = round2(totalNetPriceWeight / totalWeightAll)
+		res.AvgPriceWeightExclTransport = round2(subtotalExclTransportWeight / totalWeightAll)
 	}
 	if totalPriceAll > 0 {
-		res.AvgNetPriceUnit = round2(totalNetPrice / totalPriceAll)
+		res.AvgPriceUnitExclTransport = round2(subtotalExclTransport / totalPriceAll)
 	}
 
 	res.IsPassPriceUnitAll = passUnitAll

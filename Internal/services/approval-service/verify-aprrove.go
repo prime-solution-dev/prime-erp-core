@@ -10,6 +10,8 @@ import (
 	priceService "prime-erp-core/internal/services/price-service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
+	"gorm.io/gorm"
 )
 
 type VerifyApproveRequest struct {
@@ -33,15 +35,17 @@ type document struct {
 }
 
 type item struct {
-	ItemRef                 string  `json:"item_ref"`
-	ProductCode             string  `json:"product_code"`
-	Qty                     float64 `json:"qty"`
-	Unit                    string  `json:"unit_code"`
-	Weight                  float64 `json:"weight"`
-	PriceUnit               float64 `json:"price"`
-	TotalPrice              float64 `json:"total"`
-	TransportCostUnit       float64 `json:"transport_cost_unit"`
-	TransportCostUnitWeight float64 `json:"transport_cost_unit_weight"`
+	ItemRef     string  `json:"item_ref"`
+	ProductCode string  `json:"product_code"`
+	Qty         float64 `json:"qty"`
+	Unit        string  `json:"unit_code"`
+	Weight      float64 `json:"weight"`
+	PriceUnit   float64 `json:"price"`
+	TotalAmount float64 `json:"total_amount"`
+
+	//Option
+	TransportCostUnit       *float64 `json:"transport_cost_unit"`
+	TransportCostUnitWeight *float64 `json:"transport_cost_unit_weight"`
 }
 
 type VerifyApproveResponse struct {
@@ -54,8 +58,6 @@ type VerifyApproveResponse struct {
 
 func VerifyApprove(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 	req := VerifyApproveRequest{}
-	res := VerifyApproveResponse{}
-	isVerifyWithOldTransportCost := false
 
 	if err := json.Unmarshal([]byte(jsonPayload), &req); err != nil {
 		return nil, errors.New("failed to unmarshal JSON into struct: " + err.Error())
@@ -93,6 +95,12 @@ func VerifyApprove(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 	}
 	defer db.CloseGORM(gormx)
 
+	return VerifyApproveLogic(gormx, sqlx, req)
+}
+
+func VerifyApproveLogic(gormx *gorm.DB, sqlx *sqlx.DB, req VerifyApproveRequest) (*VerifyApproveResponse, error) {
+	res := VerifyApproveResponse{}
+	isVerifyWithOldTransportCost := false
 	compareReq := priceService.GetComparePriceRequest{}
 
 	for _, doc := range req.Documents.Items {
@@ -103,18 +111,18 @@ func VerifyApprove(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 			Qty:         doc.Qty,
 			Unit:        doc.Unit,
 			PriceUnit:   doc.PriceUnit,
-			TotalPrice:  doc.TotalPrice,
+			TotalAmount: doc.TotalAmount,
 			WeightUnit:  doc.Weight,
 		}
 
 		//Optional for transport cost verification
 		if isVerifyWithOldTransportCost {
-			item.TransportCostUnit = &doc.TransportCostUnit
-			item.TransportCostUnitWeight = &doc.TransportCostUnitWeight
+			item.TransportCostUnit = doc.TransportCostUnit
+			item.TransportCostUnitWeight = doc.TransportCostUnitWeight
 		}
 
 		compareReq.Items = append(compareReq.Items, item)
-		compareReq.TotalPrice += doc.TotalPrice
+		compareReq.TotalAmount += doc.TotalAmount
 		compareReq.TotalWeight += doc.Weight
 	}
 
@@ -198,7 +206,7 @@ func VerifyApprove(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 		}
 	}
 
-	return res, nil
+	return &res, nil
 }
 
 func verifyPrice(compareReq priceService.GetComparePriceRequest) (*priceService.GetComparePriceResponse, error) {

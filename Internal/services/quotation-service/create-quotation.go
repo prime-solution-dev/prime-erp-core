@@ -44,16 +44,6 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 	user := `system` // TODO: get from ctx
 	now := time.Now()
 
-	tx := gormx.Begin()
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
 	createQuotations := []models.Quotation{}
 	createQuotationItems := []models.QuotationItem{}
 
@@ -97,6 +87,16 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 	for _, q := range createQuotations {
 		codes = append(codes, q.QuotationCode)
 	}
+
+	tx := gormx.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	if len(codes) > 0 {
 		if err := tx.Model(&models.Quotation{}).
