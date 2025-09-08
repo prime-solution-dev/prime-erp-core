@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"prime-erp-core/Internal/models"
 	"prime-erp-core/internal/db"
+	"prime-erp-core/internal/models"
 	approvalService "prime-erp-core/internal/services/approval-service"
 	"time"
 
