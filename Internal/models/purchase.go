@@ -4,7 +4,7 @@ import "time"
 
 type PrePurchase struct {
 	ID                          string    `json:"id"`
-	PurchaseCode                string    `json:"purchase_code"`
+	PrePurchaseCode             string    `json:"pre_purchase_code"`
 	PurchaseType                string    `json:"purchase_type"`
 	CompanyCode                 string    `json:"company_code"`
 	SiteCode                    string    `json:"site_code"`
