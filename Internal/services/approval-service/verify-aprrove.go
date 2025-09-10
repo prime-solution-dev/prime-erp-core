@@ -30,6 +30,8 @@ type VerifyApproveDocument struct {
 	DocRef             string              `json:"doc_ref"`
 	CustomerCode       string              `json:"customer_code"`
 	EffectiveDatePrice time.Time           `json:"effective_date_price"`
+	TransportCost      float64             `json:"transport_cost"`
+	TransportType      string              `json:"transport_type"`
 	Items              []VerifyApproveItem `json:"items"`
 
 	//Result
@@ -155,6 +157,10 @@ func VerifyApproveLogic(gormx *gorm.DB, sqlx *sqlx.DB, req VerifyApproveRequest)
 				CustomerCode: document.CustomerCode,
 				NeedAmount:   0,
 			}
+		}
+
+		if document.TransportType == `EXCL` {
+			creditCust.NeedAmount += document.TransportCost
 		}
 
 		for _, docItem := range document.Items {
