@@ -4,16 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strings"
-
 	"prime-erp-core/internal/db"
-	modelsApproval "prime-erp-core/internal/repositories/approval/models"
+	models "prime-erp-core/internal/models"
+	"strings"
 
 	"github.com/google/uuid"
 )
 
-func GetCompanyPreload(id []uuid.UUID, approveCode []string, status []string, page int, pageSize int) ([]modelsApproval.Approval, int, int, error) {
-	aproval := []modelsApproval.Approval{}
+func GetApprovalPreload(id []uuid.UUID, approveCode []string, status []string, page int, pageSize int) ([]models.Approval, int, int, error) {
+	aproval := []models.Approval{}
 
 	gormx, err := db.ConnectGORM(`prime_erp`)
 	defer db.CloseGORM(gormx)
@@ -95,7 +94,7 @@ func GetCompanyPreload(id []uuid.UUID, approveCode []string, status []string, pa
 
 }
 
-func CreateApproval(aproval []modelsApproval.Approval, aprovalItem []modelsApproval.ApprovalItem, approvalItemPermission []modelsApproval.ApprovalItemPermission) (err error) {
+func CreateApproval(aproval []models.Approval, aprovalItem []models.ApprovalItem, approvalItemPermission []models.ApprovalItemPermission) (err error) {
 	gormx, err := db.ConnectGORM(`prime_erp`)
 	defer db.CloseGORM(gormx)
 	if err != nil {
@@ -136,7 +135,7 @@ func CreateApproval(aproval []modelsApproval.Approval, aprovalItem []modelsAppro
 	err = tx.Commit().Error
 	return err
 }
-func UpdateApproval(aproval []modelsApproval.Approval, aprovalItem []modelsApproval.ApprovalItem, approvalItemPermission []modelsApproval.ApprovalItemPermission) (int, error) {
+func UpdateApproval(aproval []models.Approval, aprovalItem []models.ApprovalItem, approvalItemPermission []models.ApprovalItemPermission) (int, error) {
 	gormx, err := db.ConnectGORM(`prime_erp`)
 	defer db.CloseGORM(gormx)
 	if err != nil {
