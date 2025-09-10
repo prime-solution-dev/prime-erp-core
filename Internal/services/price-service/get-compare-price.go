@@ -14,6 +14,7 @@ type GetComparePriceRequest struct {
 	TotalAmount        float64            `json:"total_amount"`
 	TotalWeight        float64            `json:"total_weight"`
 	TotalTransportCost float64            `json:"transport_cost"`
+	TransportType      string             `json:"transport_type"`
 	UnitCode           string             `json:"unit_code"`        // PCS
 	UnitCodeWeight     string             `json:"unit_code_weight"` //KG
 	Items              []ItemComparePrice `json:"items"`
@@ -84,11 +85,16 @@ func ComparePrice(req GetComparePriceRequest) (GetComparePriceResponse, error) {
 	for _, item := range req.Items {
 		newItem := item
 
-		newItem.TransportCostUnit = calculateTransportCost(item.TotalAmount, totalPriceAll, totalTransportCostAll, item.TransportCostUnit)
-		sumTransportUnit += float64Val(newItem.TransportCostUnit)
+		if req.TransportType == `INCL` {
+			newItem.TransportCostUnit = calculateTransportCost(item.TotalAmount, totalPriceAll, totalTransportCostAll, item.TransportCostUnit)
+			sumTransportUnit += float64Val(newItem.TransportCostUnit)
 
-		newItem.TransportCostUnitWeight = calculateTransportCost(item.TotalWeight, totalWeightAll, totalTransportCostAll, item.TransportCostUnitWeight)
-		sumTransportUnitWeight += float64Val(newItem.TransportCostUnitWeight)
+			newItem.TransportCostUnitWeight = calculateTransportCost(item.TotalWeight, totalWeightAll, totalTransportCostAll, item.TransportCostUnitWeight)
+			sumTransportUnitWeight += float64Val(newItem.TransportCostUnitWeight)
+		} else {
+			newItem.TransportCostUnit = float64Ptr(0)
+			newItem.TransportCostUnitWeight = float64Ptr(0)
+		}
 
 		res.Items = append(res.Items, newItem)
 	}
