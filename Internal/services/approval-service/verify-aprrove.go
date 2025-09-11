@@ -124,7 +124,7 @@ func VerifyApproveLogic(gormx *gorm.DB, sqlx *sqlx.DB, req VerifyApproveRequest)
 
 	inventoryReq.CompanyCode = req.CompanyCode
 	inventoryReq.SiteCode = req.SiteCode
-	inventoryReq.StorageTypes = []string{`NORMAL`}
+	inventoryReq.StorageTypes = req.StorageType
 	inventoryReq.ToDate = &req.SaleDate
 
 	for _, document := range req.Documents {
