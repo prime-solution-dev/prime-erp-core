@@ -104,7 +104,7 @@ func CreateApproval(aproval []models.Approval, aprovalItem []models.ApprovalItem
 	defer func() {
 		if rc := recover(); rc != nil {
 			tx.Rollback()
-			err = errors.New("panic error cant't save Goods Receives")
+			err = errors.New("panic error cant't save approval")
 		}
 	}()
 	if err = tx.Error; err != nil {

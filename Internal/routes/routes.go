@@ -48,7 +48,15 @@ func RegisterRoutes(ctx *gin.Engine) {
 	approval.POST("/VerifyApprove", func(c *gin.Context) {
 		utils.ProcessRequest(c, approvalService.VerifyApprove)
 	})
-
+	approval.POST("/GetApproval", func(c *gin.Context) {
+		utils.ProcessRequest(c, approvalService.GetApproval)
+	})
+	approval.POST("/CreateApproval", func(c *gin.Context) {
+		utils.ProcessRequest(c, approvalService.CreateApproval)
+	})
+	approval.POST("/UpdateApproval", func(c *gin.Context) {
+		utils.ProcessRequest(c, approvalService.UpdateApproval)
+	})
 	//credit
 	credit := ctx.Group("/credit")
 	credit.POST("/GetCreditCurrent", func(c *gin.Context) {
