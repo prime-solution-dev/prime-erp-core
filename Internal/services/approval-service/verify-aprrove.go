@@ -27,12 +27,13 @@ type VerifyApproveRequest struct {
 }
 
 type VerifyApproveDocument struct {
-	DocRef             string              `json:"doc_ref"`
-	CustomerCode       string              `json:"customer_code"`
-	EffectiveDatePrice time.Time           `json:"effective_date_price"`
-	TransportCost      float64             `json:"transport_cost"`
-	TransportType      string              `json:"transport_type"`
-	Items              []VerifyApproveItem `json:"items"`
+	DocRef                       string              `json:"doc_ref"`
+	CustomerCode                 string              `json:"customer_code"`
+	EffectiveDatePrice           time.Time           `json:"effective_date_price"`
+	TransportCost                float64             `json:"transport_cost"`
+	TransportType                string              `json:"transport_type"`
+	IsVerifyWithOldTransportCost bool                `json:"is_verify_with_old_transport_cost"`
+	Items                        []VerifyApproveItem `json:"items"`
 
 	//Result
 	IsPassPrice       bool `json:"is_pass_price"`
@@ -115,8 +116,6 @@ func VerifyApproveLogic(gormx *gorm.DB, sqlx *sqlx.DB, req VerifyApproveRequest)
 		return nil, errors.New("site code is required")
 	}
 
-	isVerifyWithOldTransportCost := false
-
 	expPriceReq := []VerifyExpiryPriceRequest{}
 	priceReqMap := map[string]priceService.GetComparePriceRequest{}
 	creditCustomerMap := map[string]VerifyCreditCustomer{}
@@ -125,7 +124,7 @@ func VerifyApproveLogic(gormx *gorm.DB, sqlx *sqlx.DB, req VerifyApproveRequest)
 
 	inventoryReq.CompanyCode = req.CompanyCode
 	inventoryReq.SiteCode = req.SiteCode
-	inventoryReq.StorageTypes = []string{`NORMAL`}
+	inventoryReq.StorageTypes = req.StorageType
 	inventoryReq.ToDate = &req.SaleDate
 
 	for _, document := range req.Documents {
@@ -135,6 +134,8 @@ func VerifyApproveLogic(gormx *gorm.DB, sqlx *sqlx.DB, req VerifyApproveRequest)
 			CustomerCode: document.CustomerCode,
 			Items:        document.Items,
 		}
+
+		isVerifyWithOldTransportCost := document.IsVerifyWithOldTransportCost
 
 		//Price
 		priceKey := document.DocRef

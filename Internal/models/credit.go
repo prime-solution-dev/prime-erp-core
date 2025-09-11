@@ -28,17 +28,18 @@ type CreditRequest struct {
 func (CreditRequest) TableName() string { return "credit_request" }
 
 type Credit struct {
-	ID           uuid.UUID  `json:"id"`
-	CustomerCode string     `json:"customer_code"`
-	Amount       float64    `json:"amount"`
-	EffectiveDtm *time.Time `json:"effective_dtm"`
-	IsActive     bool       `json:"is_active"`
-	DocRef       string     `json:"doc_ref"`
-	ApproveDate  *time.Time `json:"approve_date"`
-	CreateBy     string     `json:"create_by"`
-	CreateDtm    *time.Time `json:"create_dtm"`
-	UpdateBy     string     `json:"update_by"`
-	UpdateDate   *time.Time `json:"update_date"`
+	ID                 uuid.UUID  `json:"id"`
+	CustomerCode       string     `json:"customer_code"`
+	Amount             float64    `json:"amount"`
+	EffectiveDtm       *time.Time `json:"effective_dtm"`
+	IsActive           bool       `json:"is_active"`
+	DocRef             string     `json:"doc_ref"`
+	ApproveDate        *time.Time `json:"approve_date"`
+	AlertBalanceCredit bool       `json:"alert_balance_credit"`
+	CreateBy           string     `json:"create_by"`
+	CreateDtm          *time.Time `json:"create_dtm"`
+	UpdateBy           string     `json:"update_by"`
+	UpdateDate         *time.Time `json:"update_date"`
 }
 
 func (Credit) TableName() string { return "credit" }
