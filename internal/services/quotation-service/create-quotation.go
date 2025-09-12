@@ -8,7 +8,6 @@ import (
 
 	"prime-erp-core/internal/db"
 	"prime-erp-core/internal/models"
-	approvalService "prime-erp-core/internal/services/approval-service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -51,11 +50,11 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 
 	user := `system` // TODO: get from ctx
 	now := time.Now()
-	nowTruc := now.Truncate(24 * time.Hour)
+	// nowTruc := now.Truncate(24 * time.Hour)
 
 	createQuotations := []models.Quotation{}
 	createQuotationItems := []models.QuotationItem{}
-	verifyReqMap := map[string]approvalService.VerifyApproveRequest{}
+	// verifyReqMap := map[string]approvalService.VerifyApproveRequest{}
 
 	for _, quotationReq := range req.Quotations {
 		tempQuotation := quotationReq.Quotation
@@ -77,26 +76,26 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 		createQuotations = append(createQuotations, tempQuotation)
 
 		//Approval
-		verifyReqKey := fmt.Sprintf(`%s|%s`, quotationReq.CompanyCode, quotationReq.SiteCode)
-		verifyReq, existVerifyReq := verifyReqMap[verifyReqKey]
-		if !existVerifyReq {
-			newVerifyReq := approvalService.VerifyApproveRequest{
-				IsVerifyPrice: true,
-				CompanyCode:   quotationReq.CompanyCode,
-				SiteCode:      quotationReq.SiteCode,
-				StorageType:   []string{`NORMAL`},
-				SaleDate:      nowTruc,
-			}
+		// verifyReqKey := fmt.Sprintf(`%s|%s`, quotationReq.CompanyCode, quotationReq.SiteCode)
+		// verifyReq, existVerifyReq := verifyReqMap[verifyReqKey]
+		// if !existVerifyReq {
+		// 	newVerifyReq := approvalService.VerifyApproveRequest{
+		// 		IsVerifyPrice: true,
+		// 		CompanyCode:   quotationReq.CompanyCode,
+		// 		SiteCode:      quotationReq.SiteCode,
+		// 		StorageType:   []string{`NORMAL`},
+		// 		SaleDate:      nowTruc,
+		// 	}
 
-			verifyReq = newVerifyReq
-		}
+		// 	verifyReq = newVerifyReq
+		// }
 
-		newApprDoc := approvalService.VerifyApproveDocument{
-			DocRef:             quotationReq.QuotationCode,
-			CustomerCode:       quotationReq.CustomerCode,
-			EffectiveDatePrice: *quotationReq.EffectiveDatePrice,
-			Items:              []approvalService.VerifyApproveItem{},
-		}
+		// newApprDoc := approvalService.VerifyApproveDocument{
+		// 	DocRef:             quotationReq.QuotationCode,
+		// 	CustomerCode:       quotationReq.CustomerCode,
+		// 	EffectiveDatePrice: *quotationReq.EffectiveDatePrice,
+		// 	Items:              []approvalService.VerifyApproveItem{},
+		// }
 
 		for _, item := range quotationReq.Items {
 			item.ID = uuid.New()
@@ -114,43 +113,43 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 			createQuotationItems = append(createQuotationItems, item)
 
 			//Approval
-			newApprItem := approvalService.VerifyApproveItem{
-				ItemRef:       item.QuotationItem,
-				ProductCode:   item.ProductCode,
-				Qty:           item.Qty,
-				Unit:          item.Unit,
-				TotalWeight:   item.TotalWeight,
-				PriceUnit:     item.PriceUnit,
-				PriceListUnit: item.PriceListUnit,
-				TotalAmount:   item.TotalAmount,
-				SaleUnit:      item.SaleUnit,
-				SaleUnitType:  item.SaleUnitType,
-			}
+			// newApprItem := approvalService.VerifyApproveItem{
+			// 	ItemRef:       item.QuotationItem,
+			// 	ProductCode:   item.ProductCode,
+			// 	Qty:           item.Qty,
+			// 	Unit:          item.Unit,
+			// 	TotalWeight:   item.TotalWeight,
+			// 	PriceUnit:     item.PriceUnit,
+			// 	PriceListUnit: item.PriceListUnit,
+			// 	TotalAmount:   item.TotalAmount,
+			// 	SaleUnit:      item.SaleUnit,
+			// 	SaleUnitType:  item.SaleUnitType,
+			// }
 
-			newApprDoc.Items = append(newApprDoc.Items, newApprItem)
+			// newApprDoc.Items = append(newApprDoc.Items, newApprItem)
 		}
 
 		//Approval
-		verifyReq.Documents = append(verifyReq.Documents, newApprDoc)
-		verifyReqMap[verifyReqKey] = verifyReq
+		// verifyReq.Documents = append(verifyReq.Documents, newApprDoc)
+		// verifyReqMap[verifyReqKey] = verifyReq
 	}
 
 	//Verification
-	if req.IsVerifyPrice {
-		for _, verifyReq := range verifyReqMap {
-			verifyRes, err := approvalService.VerifyApproveLogic(gormx, sqlx, verifyReq)
-			if err != nil {
-				return nil, err
-			}
+	// if req.IsVerifyPrice {
+	// 	for _, verifyReq := range verifyReqMap {
+	// 		verifyRes, err := approvalService.VerifyApproveLogic(gormx, sqlx, verifyReq)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
 
-			for _, doc := range verifyRes.Documents {
-				res = append(res, CreateQuotationResponse{
-					IsPass:        doc.IsPassPrice,
-					QuotationCode: doc.DocRef,
-				})
-			}
-		}
-	}
+	// 		for _, doc := range verifyRes.Documents {
+	// 			res = append(res, CreateQuotationResponse{
+	// 				IsPass:        doc.IsPassPrice,
+	// 				QuotationCode: doc.DocRef,
+	// 			})
+	// 		}
+	// 	}
+	// }
 
 	// check duplicate quotation codes
 	var existCount int64
