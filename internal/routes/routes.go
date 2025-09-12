@@ -30,7 +30,7 @@ func RegisterRoutes(ctx *gin.Engine) {
 	//quotation
 	quotation := ctx.Group("/quotation")
 
-	quotation.POST("/GetQoutation", func(c *gin.Context) {
+	quotation.POST("/GetQuotation", func(c *gin.Context) {
 		utils.ProcessRequest(c, quotationService.GetQuotation)
 	})
 	quotation.POST("/CreateQuotation", func(c *gin.Context) {
