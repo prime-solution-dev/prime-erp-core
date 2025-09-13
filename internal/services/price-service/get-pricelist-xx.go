@@ -134,7 +134,7 @@ func getExtras(sqlx *sqlx.DB, res []GetPriceListGroupResponse) ([]GetPriceListGr
 	}
 
 	if len(groupIDs) == 0 {
-		return nil, fmt.Errorf("no group IDs found")
+		return res, nil
 	}
 
 	query := fmt.Sprintf(`
@@ -149,10 +149,11 @@ func getExtras(sqlx *sqlx.DB, res []GetPriceListGroupResponse) ([]GetPriceListGr
 			gk.value,
 			gk.seq
 		from price_list_group_extra ple
-		left join group_extra_key gk on ple.id = gk.group_extra_id 
+		left join price_list_group_extra_key gk on ple.id = gk.group_extra_id 
 		where 1=1
 		and ple.price_list_group_id in ('%s')
 	`, strings.Join(groupIDs, `','`))
+	println(query)
 	rows, err := db.ExecuteQuery(sqlx, query)
 	if err != nil {
 		return nil, fmt.Errorf("ExecuteQuery error: %w", err)
@@ -207,7 +208,7 @@ func getTerms(sqlx *sqlx.DB, res []GetPriceListGroupResponse) ([]GetPriceListGro
 	}
 
 	if len(groupIDs) == 0 {
-		return nil, fmt.Errorf("no group IDs found")
+		return res, nil
 	}
 
 	query := fmt.Sprintf(`
