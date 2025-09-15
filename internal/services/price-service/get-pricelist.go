@@ -270,17 +270,20 @@ func getGroupSubGroup(sqlx *sqlx.DB, req GetPriceListGroupRequest) ([]GetPriceLi
 	}
 
 	if len(req.GroupCodes) > 0 {
+		cond += fmt.Sprintf(` and plg.group_code in ('%s') `, strings.Join(req.GroupCodes, `','`))
+	}
+
+	if len(req.SubGroupCodes) > 0 {
 		cond += fmt.Sprintf(`
-			and not exists (
+			and exists (
 				select 0
 				from price_list_group plgx
 				left join price_list_sub_group plsgx on plgx.id = plsgx.price_list_group_id 
-				left join price_list_sub_group_key sgkx on sgkx.sub_group_id = plsgx.id
 				where 1=1
 					and plgx.id = plg.id
-					and sgkx.code in ('%s')
+					and plsgx.subgroup_key in ('%s')
 			)
-		`, strings.Join(req.GroupCodes, `','`))
+		`, strings.Join(req.SubGroupCodes, `','`))
 	}
 
 	// Query Group + SubGroup
@@ -324,7 +327,7 @@ func getGroupSubGroup(sqlx *sqlx.DB, req GetPriceListGroupRequest) ([]GetPriceLi
 		LEFT JOIN price_list_sub_group plsg ON plg.id = plsg.price_list_group_id
 		WHERE 1=1 %s
 	`, cond)
-	//println(query)
+	println(query)
 	rows, err := db.ExecuteQuery(sqlx, query)
 	if err != nil {
 		return nil, fmt.Errorf("ExecuteQuery error: %w", err)
