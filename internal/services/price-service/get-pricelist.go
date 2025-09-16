@@ -134,7 +134,7 @@ func getExtras(sqlx *sqlx.DB, res []GetPriceListGroupResponse) ([]GetPriceListGr
 	}
 
 	if len(groupIDs) == 0 {
-		return nil, fmt.Errorf("no group IDs found")
+		return res, nil
 	}
 
 	query := fmt.Sprintf(`
@@ -149,10 +149,11 @@ func getExtras(sqlx *sqlx.DB, res []GetPriceListGroupResponse) ([]GetPriceListGr
 			gk.value,
 			gk.seq
 		from price_list_group_extra ple
-		left join group_extra_key gk on ple.id = gk.group_extra_id 
+		left join price_list_group_extra_key gk on ple.id = gk.group_extra_id 
 		where 1=1
 		and ple.price_list_group_id in ('%s')
 	`, strings.Join(groupIDs, `','`))
+	println(query)
 	rows, err := db.ExecuteQuery(sqlx, query)
 	if err != nil {
 		return nil, fmt.Errorf("ExecuteQuery error: %w", err)
@@ -207,7 +208,7 @@ func getTerms(sqlx *sqlx.DB, res []GetPriceListGroupResponse) ([]GetPriceListGro
 	}
 
 	if len(groupIDs) == 0 {
-		return nil, fmt.Errorf("no group IDs found")
+		return res, nil
 	}
 
 	query := fmt.Sprintf(`
@@ -269,17 +270,21 @@ func getGroupSubGroup(sqlx *sqlx.DB, req GetPriceListGroupRequest) ([]GetPriceLi
 	}
 
 	if len(req.GroupCodes) > 0 {
-		cond += fmt.Sprintf(`
-			and not exists (
-				select 0
-				from price_list_group plgx
-				left join price_list_sub_group plsgx on plgx.id = plsgx.price_list_group_id 
-				left join price_list_sub_group_key sgkx on sgkx.sub_group_id = plsgx.id
-				where 1=1
-					and plgx.id = plg.id
-					and sgkx.code in ('%s')
-			)
-		`, strings.Join(req.GroupCodes, `','`))
+		cond += fmt.Sprintf(` and plg.group_code in ('%s') `, strings.Join(req.GroupCodes, `','`))
+	}
+
+	if len(req.SubGroupCodes) > 0 {
+		cond += fmt.Sprintf(` and plsg.subgroup_key in ('%s') `, strings.Join(req.SubGroupCodes, `','`))
+		// cond += fmt.Sprintf(`
+		// 	and exists (
+		// 		select 0
+		// 		from price_list_group plgx
+		// 		left join price_list_sub_group plsgx on plgx.id = plsgx.price_list_group_id
+		// 		where 1=1
+		// 			and plgx.id = plg.id
+		// 			and plsgx.subgroup_key in ('%s')
+		// 	)
+		// `, strings.Join(req.SubGroupCodes, `','`))
 	}
 
 	// Query Group + SubGroup
