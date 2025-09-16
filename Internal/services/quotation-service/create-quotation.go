@@ -8,7 +8,7 @@ import (
 
 	"prime-erp-core/internal/db"
 	"prime-erp-core/internal/models"
-	approvalService "prime-erp-core/internal/services/approval-service"
+	verifyService "prime-erp-core/internal/services/verify-service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -55,7 +55,7 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 
 	createQuotations := []models.Quotation{}
 	createQuotationItems := []models.QuotationItem{}
-	verifyReqMap := map[string]approvalService.VerifyApproveRequest{}
+	verifyReqMap := map[string]verifyService.VerifyApproveRequest{}
 
 	for _, quotationReq := range req.Quotations {
 		tempQuotation := quotationReq.Quotation
@@ -80,7 +80,7 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 		verifyReqKey := fmt.Sprintf(`%s|%s`, quotationReq.CompanyCode, quotationReq.SiteCode)
 		verifyReq, existVerifyReq := verifyReqMap[verifyReqKey]
 		if !existVerifyReq {
-			newVerifyReq := approvalService.VerifyApproveRequest{
+			newVerifyReq := verifyService.VerifyApproveRequest{
 				IsVerifyPrice: true,
 				CompanyCode:   quotationReq.CompanyCode,
 				SiteCode:      quotationReq.SiteCode,
@@ -91,11 +91,11 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 			verifyReq = newVerifyReq
 		}
 
-		newApprDoc := approvalService.VerifyApproveDocument{
+		newApprDoc := verifyService.VerifyApproveDocument{
 			DocRef:             quotationReq.QuotationCode,
 			CustomerCode:       quotationReq.CustomerCode,
 			EffectiveDatePrice: *quotationReq.EffectiveDatePrice,
-			Items:              []approvalService.VerifyApproveItem{},
+			Items:              []verifyService.VerifyApproveItem{},
 		}
 
 		for _, item := range quotationReq.Items {
@@ -114,7 +114,7 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 			createQuotationItems = append(createQuotationItems, item)
 
 			//Approval
-			newApprItem := approvalService.VerifyApproveItem{
+			newApprItem := verifyService.VerifyApproveItem{
 				ItemRef:       item.QuotationItem,
 				ProductCode:   item.ProductCode,
 				Qty:           item.Qty,
@@ -138,7 +138,7 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 	//Verification
 	if req.IsVerifyPrice {
 		for _, verifyReq := range verifyReqMap {
-			verifyRes, err := approvalService.VerifyApproveLogic(gormx, sqlx, verifyReq)
+			verifyRes, err := verifyService.VerifyApproveLogic(gormx, sqlx, verifyReq)
 			if err != nil {
 				return nil, err
 			}

@@ -1,4 +1,4 @@
-package approvalService
+package verifyService
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package approvalService
+package verifyService
 
 import priceService "prime-erp-core/internal/services/price-service"
 

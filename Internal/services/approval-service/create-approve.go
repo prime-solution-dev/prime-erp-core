@@ -12,10 +12,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type JSONB struct {
-	json.RawMessage
-}
-
 func CreateApproval(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 
 	var req []models.Approval
@@ -49,30 +45,29 @@ func CreateApproval(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 		req[i].ID = approvalID
 		approvalIDForReturn = append(approvalIDForReturn, approvalID)
 
-		for o := range approval.ApprovalItem {
-			approvalItemID := uuid.New()
-			req[i].ApprovalItem[o].ID = approvalItemID
-			req[i].ApprovalItem[o].ApprovalID = approvalID
-			req[i].ApprovalItem[o].StepSeq = 1
-			req[i].ApprovalItem[o].IsCondition = false
-			jsonDataApprovalItem, _ := json.Marshal(req[i].ApprovalItem[o])
-			req[i].ApprovalItem[o].Condition = jsonDataApprovalItem
-			req[i].ApprovalItem[o].Status = "PENDING"
-			req[i].ApprovalItem[o].ActionDate = time.Now()
-
-			for _, requesterValue := range requester {
-				approvalItemPermissionID := uuid.New()
-				newApprovalItemPermission := models.ApprovalItemPermission{
-					ID:             approvalItemPermissionID,
-					ApprovalItemID: approvalItemID,
-					UserCode:       requesterValue.RequesterID,
-				}
-				approvalItemPermissionValue = append(approvalItemPermissionValue, newApprovalItemPermission)
-			}
-			req[i].ApprovalItem[o].ApprovalItemPermission = []models.ApprovalItemPermission{}
-			approvalItemValue = append(approvalItemValue, req[i].ApprovalItem[o])
-
+		approvalItemID := uuid.New()
+		newApprovalItem := models.ApprovalItem{
+			ID:                     approvalItemID,
+			ApprovalID:             approvalID,
+			StepSeq:                1,
+			IsCondition:            false,
+			Condition:              nil,
+			Status:                 "PENDING",
+			ActionBy:               req[i].CreateBy,
+			ActionDate:             time.Now(),
+			ApprovalItemPermission: []models.ApprovalItemPermission{},
 		}
+
+		for _, requesterValue := range requester {
+			approvalItemPermissionID := uuid.New()
+			newApprovalItemPermission := models.ApprovalItemPermission{
+				ID:             approvalItemPermissionID,
+				ApprovalItemID: approvalItemID,
+				UserCode:       requesterValue.RequesterID,
+			}
+			approvalItemPermissionValue = append(approvalItemPermissionValue, newApprovalItemPermission)
+		}
+		approvalItemValue = append(approvalItemValue, newApprovalItem)
 
 		if req[i].ApproveCode != "" {
 			req[i].ApproveCode = approval.ApproveCode

@@ -58,7 +58,7 @@ func GetApprovalPreload(id []uuid.UUID, approveCode []string, status []string, p
 
 		var count = len(approvalID)
 
-		query := gormx.Preload("approval_item.ApprovalItemPermission")
+		query := gormx.Preload("ApprovalItem.ApprovalItemPermission")
 
 		query = query.Where("id in (?)", approvalID)
 
@@ -143,8 +143,7 @@ func UpdateApproval(aproval []models.Approval, aprovalItem []models.ApprovalItem
 	}
 	rowsAffected := 0
 	for _, aprovalValue := range aproval {
-		result := gormx.Table("aproval").Select("approve_code", "approve_topic", "document_type", "document_code", "document_data",
-			"action_date", "status", "remark", "curent_step_seq").Where("id = ?", aprovalValue.ID).Updates(&aprovalValue)
+		result := gormx.Table("aproval").Where("id = ?", aprovalValue.ID).Updates(&aprovalValue)
 
 		if result.Error != nil {
 			gormx.Rollback()
@@ -153,7 +152,7 @@ func UpdateApproval(aproval []models.Approval, aprovalItem []models.ApprovalItem
 		rowsAffected = int(result.RowsAffected)
 	}
 	for _, aprovalItemValue := range aprovalItem {
-		result := gormx.Table("approval_item").Select("step_seq", "is_condition", "condition", "status", "action_by", "action_date").Where("id = ?", aprovalItemValue.ID).Updates(&aprovalItemValue)
+		result := gormx.Table("approval_item").Where("id = ?", aprovalItemValue.ID).Updates(&aprovalItemValue)
 
 		if result.Error != nil {
 			gormx.Rollback()
@@ -162,7 +161,7 @@ func UpdateApproval(aproval []models.Approval, aprovalItem []models.ApprovalItem
 		rowsAffected = int(result.RowsAffected)
 	}
 	for _, approvalItemPermissionValue := range approvalItemPermission {
-		result := gormx.Table("approval_item_permission").Select("approval_item_id", "user_code").Where("id = ?", approvalItemPermissionValue.ID).Updates(&approvalItemPermissionValue)
+		result := gormx.Table("approval_item_permission").Where("id = ?", approvalItemPermissionValue.ID).Updates(&approvalItemPermissionValue)
 
 		if result.Error != nil {
 			gormx.Rollback()

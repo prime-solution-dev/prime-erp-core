@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"prime-erp-core/internal/db"
 	"prime-erp-core/internal/models"
-	approvalService "prime-erp-core/internal/services/approval-service"
+	verifyService "prime-erp-core/internal/services/verify-service"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -61,7 +61,7 @@ func CreateSale(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 
 	createSales := []models.Sale{}
 	createSaleItems := []models.SaleItem{}
-	verifyReqMap := map[string]approvalService.VerifyApproveRequest{}
+	verifyReqMap := map[string]verifyService.VerifyApproveRequest{}
 
 	for _, saleReq := range req.Sales {
 		tempSale := saleReq.Sale
@@ -82,7 +82,7 @@ func CreateSale(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 		verifyReqKey := fmt.Sprintf(`%s|%s`, saleReq.CompanyCode, saleReq.SiteCode)
 		verifyReq, existVerifyReq := verifyReqMap[verifyReqKey]
 		if !existVerifyReq {
-			newVerifyReq := approvalService.VerifyApproveRequest{
+			newVerifyReq := verifyService.VerifyApproveRequest{
 				IsVerifyPrice:       req.IsVerifyPrice,
 				IsVerifyCredit:      req.IsVerifyCredit,
 				IsVerifyExpiryPrice: req.IsVerifyExpiryDate,
@@ -95,10 +95,10 @@ func CreateSale(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 			verifyReq = newVerifyReq
 		}
 
-		newApprDoc := approvalService.VerifyApproveDocument{
+		newApprDoc := verifyService.VerifyApproveDocument{
 			DocRef:       tempSale.SaleCode,
 			CustomerCode: saleReq.CustomerCode,
-			Items:        []approvalService.VerifyApproveItem{},
+			Items:        []verifyService.VerifyApproveItem{},
 		}
 
 		for _, item := range saleReq.Items {
@@ -112,7 +112,7 @@ func CreateSale(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 			createSaleItems = append(createSaleItems, item)
 
 			//Approval
-			newApprItem := approvalService.VerifyApproveItem{
+			newApprItem := verifyService.VerifyApproveItem{
 				ItemRef:       item.SaleItem,
 				ProductCode:   item.ProductCode,
 				Qty:           item.Qty,
@@ -135,7 +135,7 @@ func CreateSale(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 
 	// Verification
 	for _, verifyReq := range verifyReqMap {
-		verifyRes, err := approvalService.VerifyApproveLogic(gormx, sqlx, verifyReq)
+		verifyRes, err := verifyService.VerifyApproveLogic(gormx, sqlx, verifyReq)
 		if err != nil {
 			return nil, err
 		}
