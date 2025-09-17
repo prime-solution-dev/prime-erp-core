@@ -32,7 +32,7 @@ func UpdateApproval(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 			req[i].ApprovalItem[o].Condition = jsonDataApprovalItem
 			req[i].ApprovalItem[o].Status = "PENDING"
 			req[i].ApprovalItem[o].ActionDate = time.Now()
-
+			req[i].ApprovalItem[o].UpdateBy = req[i].UpdateBy
 			req[i].ApprovalItem[o].ApprovalItemPermission = []models.ApprovalItemPermission{}
 			approvalItemValue = append(approvalItemValue, req[i].ApprovalItem[o])
 

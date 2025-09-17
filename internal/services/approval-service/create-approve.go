@@ -55,6 +55,8 @@ func CreateApproval(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 			Status:                 "PENDING",
 			ActionBy:               req[i].CreateBy,
 			ActionDate:             time.Now(),
+			CreateBy:               req[i].CreateBy,
+			UpdateBy:               req[i].CreateBy,
 			ApprovalItemPermission: []models.ApprovalItemPermission{},
 		}
 

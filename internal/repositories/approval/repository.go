@@ -11,7 +11,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetApprovalPreload(id []uuid.UUID, approveCode []string, status []string, page int, pageSize int) ([]models.Approval, int, int, error) {
+type ApprovalID struct {
+	ApprovalID []uuid.UUID `gorm:"type:varchar(50)" json:"approval_id"`
+}
+
+func GetApprovalPreload(id []uuid.UUID, approveCode []string, status []string, documentCode []string, page int, pageSize int) ([]models.Approval, int, int, error) {
 	aproval := []models.Approval{}
 
 	gormx, err := db.ConnectGORM(`prime_erp`)
@@ -47,12 +51,21 @@ func GetApprovalPreload(id []uuid.UUID, approveCode []string, status []string, p
 		whereInClause := strings.Join(quotedStrings, ", ")
 		searchStatus = fmt.Sprintf(` and approval.status IN (%s)`, whereInClause)
 	}
+	searchDocumentCode := ""
+	if len(documentCode) > 0 {
+		quotedStrings := make([]string, len(documentCode))
+		for i, s := range documentCode {
+			quotedStrings[i] = fmt.Sprintf("'%s'", s)
+		}
+		whereInClause := strings.Join(quotedStrings, ", ")
+		searchDocumentCode = fmt.Sprintf(` and approval.document_code IN (%s)`, whereInClause)
+	}
 	var approvalID []uuid.UUID
 	gormx.Table("approval").Select("approval.id").
 		Joins("inner join approval_item on approval.id = approval_item.approval_id").
 		Joins("inner join approval_item_permission on approval_item.id = approval_item_permission.approval_item_id").
-		Where("1=1 " + searchID + "" + searchApproveCode + "" + searchStatus + "").
-		Group("approval.id").Scan(approvalID)
+		Where("1=1 " + searchID + "" + searchApproveCode + "" + searchStatus + "" + searchDocumentCode + "").
+		Group("approval.id").Scan(&approvalID)
 
 	if len(approvalID) > 0 {
 
@@ -77,7 +90,7 @@ func GetApprovalPreload(id []uuid.UUID, approveCode []string, status []string, p
 
 		}
 
-		err = query.Order("update_dtm desc").Find(&aproval).Error
+		err = query.Order("update_date desc").Find(&aproval).Error
 		sqlDB, err1 := gormx.DB()
 		if err1 != nil {
 			return nil, 0, 0, err1

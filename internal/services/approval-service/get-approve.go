@@ -11,11 +11,12 @@ import (
 )
 
 type GetApprovalRequest struct {
-	ID          []uuid.UUID `json:"id"`
-	ApproveCode []string    `json:"approval_code"`
-	Status      []string    `json:"status"`
-	Page        int         `json:"page"`
-	PageSize    int         `json:"page_size"`
+	ID           []uuid.UUID `json:"id"`
+	ApproveCode  []string    `json:"approval_code"`
+	Status       []string    `json:"status"`
+	DocumentCode []string    `json:"document_code"`
+	Page         int         `json:"page"`
+	PageSize     int         `json:"page_size"`
 }
 type ResultApproval struct {
 	Total       int               `json:"total"`
@@ -33,7 +34,7 @@ func GetApproval(ctx *gin.Context, jsonPayload string) (interface{}, error) {
 		return nil, errors.New("failed to unmarshal JSON into struct: " + err.Error())
 	}
 
-	approval, totalPages, totalRecords, errApproval := repositoryApproval.GetApprovalPreload(req.ID, req.ApproveCode, req.Status, req.Page, req.PageSize)
+	approval, totalPages, totalRecords, errApproval := repositoryApproval.GetApprovalPreload(req.ID, req.ApproveCode, req.Status, req.DocumentCode, req.Page, req.PageSize)
 	if errApproval != nil {
 		return nil, errApproval
 	}
