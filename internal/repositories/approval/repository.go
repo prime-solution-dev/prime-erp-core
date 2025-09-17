@@ -11,10 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type ApprovalID struct {
-	ApprovalID []uuid.UUID `gorm:"type:varchar(50)" json:"approval_id"`
-}
-
 func GetApprovalPreload(id []uuid.UUID, approveCode []string, status []string, documentCode []string, page int, pageSize int) ([]models.Approval, int, int, error) {
 	aproval := []models.Approval{}
 
