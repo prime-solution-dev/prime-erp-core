@@ -28,6 +28,8 @@ go.work.sum
 .env
 cmd/.env
 
+Internal
+External
 # Editor/IDE
 # .idea/
 # .vscode/
