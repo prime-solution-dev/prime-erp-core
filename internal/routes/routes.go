@@ -8,6 +8,7 @@ import (
 	priceService "prime-erp-core/internal/services/price-service"
 	quotationService "prime-erp-core/internal/services/quotation-service"
 	saleService "prime-erp-core/internal/services/sale-service"
+	unitService "prime-erp-core/internal/services/unit-service"
 	verifyService "prime-erp-core/internal/services/verify-service"
 
 	"github.com/gin-gonic/gin"
@@ -70,4 +71,9 @@ func RegisterRoutes(ctx *gin.Engine) {
 		utils.ProcessRequest(c, creditService.UpdateCreditRequest)
 	})
 
+	//unit
+	unit := ctx.Group("/unit")
+	unit.POST("GetAllUnit", func(c *gin.Context) {
+		utils.ProcessRequest(c, unitService.GetAllUnit)
+	})
 }
