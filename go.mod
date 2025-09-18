@@ -1,5 +1,5 @@
-module github.com/prime-solution-dev/prime-wms-erp-core
-//module prime-erp-core
+//module github.com/prime-solution-dev/prime-wms-erp-core
+module prime-erp-core
 
 go 1.23
 
