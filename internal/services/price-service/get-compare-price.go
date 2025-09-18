@@ -41,19 +41,19 @@ type ItemComparePrice struct {
 	SaleUnitType            string   `json:"sale_unit_type"`
 	PriceListUnit           float64  `json:"price_list"`
 	PriceUnit               float64  `json:"price"`
-	TotalAmount             float64  `json:"total_amount"`
-	TotalWeight             float64  `json:"total_weight"`
-	TransportCostUnit       *float64 `json:"transport_cost_unit"`
-	TransportCostUnitWeight *float64 `json:"transport_cost_unit_weight"`
+	TotalAmount             float64  `json:"total_amount"`               //1
+	TotalWeight             float64  `json:"total_weight"`               //7
+	TransportCostUnit       *float64 `json:"transport_cost_unit"`        //2
+	TransportCostUnitWeight *float64 `json:"transport_cost_unit_weight"` //8
 
 	// Results
-	SubtotalExclTransport          float64 `json:"subtotal_excl_transport"`
-	NetPriceUnitExclTransport      float64 `json:"net_price_unit_excl_transport"`
-	PriceDiffUnit                  float64 `json:"price_diff_unit"`
-	IsPassPriceUnit                bool    `json:"is_pass_price_unit"`
-	SubtotalWeightExclTransport    float64 `json:"subtotal_weight_excl_transport"`
-	NetPricePerWeightExclTransport float64 `json:"net_price_per_weight_excl_transport"`
-	PriceDiffUnitWeight            float64 `json:"price_diff_unit_weight"`
+	SubtotalExclTransport          float64 `json:"subtotal_excl_transport"`             //3
+	NetPriceUnitExclTransport      float64 `json:"net_price_unit_excl_transport"`       //4
+	PriceDiffUnit                  float64 `json:"price_diff_unit"`                     //5
+	IsPassPriceUnit                bool    `json:"is_pass_price_unit"`                  //6
+	SubtotalWeightExclTransport    float64 `json:"subtotal_weight_excl_transport"`      //9
+	NetPricePerWeightExclTransport float64 `json:"net_price_per_weight_excl_transport"` //10
+	PriceDiffUnitWeight            float64 `json:"price_diff_unit_weight"`              //11
 	IsPassPriceWeight              bool    `json:"is_pass_price_weight"`
 }
 

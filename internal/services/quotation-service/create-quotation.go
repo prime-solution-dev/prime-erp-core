@@ -148,6 +148,18 @@ func CreateQuotation(ctx *gin.Context, jsonPayload string) (interface{}, error) 
 					IsPass:        doc.IsPassPrice,
 					QuotationCode: doc.DocRef,
 				})
+
+				for _, quotation := range createQuotations {
+					if doc.DocRef == quotation.QuotationCode {
+						if !doc.IsPassPrice {
+							quotation.IsApproved = false
+							quotation.StatusApprove = "PROCESS"
+						} else {
+							quotation.IsApproved = true
+							quotation.StatusApprove = "COMPLETED"
+						}
+					}
+				}
 			}
 		}
 	}
