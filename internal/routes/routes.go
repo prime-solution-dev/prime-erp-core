@@ -77,7 +77,7 @@ func RegisterRoutes(ctx *gin.Engine) {
 
 	//unit
 	unit := ctx.Group("/unit")
-	unit.POST("GetAllUnit", func(c *gin.Context) {
+	unit.POST("/GetAllUnit", func(c *gin.Context) {
 		utils.ProcessRequest(c, unitService.GetAllUnit)
 	})
 }
